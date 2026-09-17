@@ -1,0 +1,4 @@
+# Keep instructor material out of GitHub's source archives.
+instructor/ export-ignore
+solution/ export-ignore
+outputs/ export-ignore

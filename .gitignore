@@ -1,0 +1,8 @@
+# Publish the reference solution only after the initial submission deadline.
+solution/
+instructor/validation-output/
+outputs/
+MANIFEST.txt
+*.zip
+.DS_Store
+__pycache__/

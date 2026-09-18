@@ -43,9 +43,10 @@ end
     savemaze(maze::MyMazeModel, path::AbstractString; route = nothing) -> String
 
 Write a labeled map as a Scalable Vector Graphics (SVG) file. Route segments
-are blue before collecting the card and orange afterward; Part 1 position
-routes are blue throughout. Use the public tests to establish route legality
-and optimality, since the drawing does not check either property.
+are blue before collecting the CornellID and orange afterward; Part 1 position
+routes are blue throughout. Run `testme_part_1.jl` or `testme_part_2.jl` to
+test whether your solver returns legal shortest routes. The drawing does
+not check route legality or length.
 
 ### Arguments
 
@@ -82,8 +83,8 @@ function savemaze(maze::MyMazeModel, path::AbstractString; route=nothing)::Strin
     mkpath(dirname(abspath(path)));
     open(path, "w") do io
         println(io, "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"$width\" height=\"$height\" viewBox=\"0 0 $width $height\" role=\"img\" aria-labelledby=\"title description\">");
-        println(io, "<title id=\"title\">Escape from Olin: the missing keycard</title>");
-        println(io, "<desc id=\"description\">Fictional maze. S is the start, E the exit, K the keycard, and D a locked door. Row and column labels use one-based indices.</desc>");
+        println(io, "<title id=\"title\">Escape from Olin: the missing CornellID</title>");
+        println(io, "<desc id=\"description\">Fictional maze. S is the start, E the exit, K the CornellID, and D a locked door. Row and column labels use one-based indices.</desc>");
         println(io, "<rect width=\"100%\" height=\"100%\" fill=\"#ffffff\"/>");
         println(io, "<g font-family=\"Arial, Helvetica, sans-serif\" fill=\"#1c303a\">");
         println(io, "<text x=\"24\" y=\"32\" font-size=\"21\" font-weight=\"bold\">Escape from Olin</text>");
@@ -126,10 +127,10 @@ function savemaze(maze::MyMazeModel, path::AbstractString; route=nothing)::Strin
         end
         # Add the map legend -
         baseline = top + rows * tile; # lower edge of the grid
-        println(io, "<text x=\"24\" y=\"$(baseline + 30)\" font-size=\"13\">S = Start · E = Exit · K = Keycard · D = Locked door</text>");
+        println(io, "<text x=\"24\" y=\"$(baseline + 30)\" font-size=\"13\">S = Start · E = Exit · K = CornellID · D = Locked door</text>");
         println(io, "<text x=\"24\" y=\"$(baseline + 52)\" font-size=\"12\">Dark cells are walls. Move up, down, left, or right; each move costs one.</text>");
         if route !== nothing
-            println(io, "<text x=\"24\" y=\"$(baseline + 76)\" font-size=\"12\">Blue: without card. Orange: carrying card. Read the route vector for visit order.</text>");
+            println(io, "<text x=\"24\" y=\"$(baseline + 76)\" font-size=\"12\">Blue: without CornellID. Orange: carrying CornellID. Read the route vector for visit order.</text>");
         end
         println(io, "</g></svg>");
     end

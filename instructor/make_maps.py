@@ -71,7 +71,7 @@ def main():
     grid[1][1], grid[-2][-2] = "S", "E"
     write("production_part_1.txt", grid)
 
-    # Part 2 puts a door on the only exit route and the key on an upstream branch -
+    # Part 2 puts a door on the only exit route and the CornellID on an upstream branch -
     grid = maze(21, 31, 20261003)
     start, goal = (1, 1), (19, 29)
     distance, parent = distances(grid, start)

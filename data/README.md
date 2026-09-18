@@ -13,13 +13,15 @@ That instructor file is excluded from the student archive; no generator is neede
 | [test_part_2.txt](test_part_2.txt) | 5 × 11 | 16 |
 | [production_part_2.txt](production_part_2.txt) | 21 × 31 | 178 |
 
-Every move has unit cost. The Part 2 counts include the keycard detour and obey
+Every move has unit cost. The Part 2 counts include the detour to collect the CornellID and obey
 the locked-door rule. Counts were checked with an independent Python search
 and the Julia reference implementation. The small maps can also be checked by hand.
 
 ## File digests
 
-SHA-256 digests identify the exact map bytes used by the public tests:
+SHA-256 digests identify the exact map bytes used by
+[`testme_part_1.jl`](../testme_part_1.jl) and
+[`testme_part_2.jl`](../testme_part_2.jl):
 
 ```text
 dcea565cc82724d37dac9a232876cdfd3da2a54677610e9aeac5cd781642a230  test_part_1.txt

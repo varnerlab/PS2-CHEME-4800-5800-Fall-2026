@@ -36,7 +36,7 @@ function build(::Type{MyMazeModel}, lines::AbstractVector{<:AbstractString})::My
     # Initialize -
     cells = Matrix{Char}(undef, length(rows), width); # one map symbol per row-column position
     starts, goals = Position[], Position[]; # retain every marker so duplicates can be rejected
-    key_count = 0; # at most one keycard is allowed
+    key_count = 0; # at most one CornellID is allowed
 
     # Populate the map and record its marked cells -
     for r in eachindex(rows), c in 1:width
@@ -48,7 +48,7 @@ function build(::Type{MyMazeModel}, lines::AbstractVector{<:AbstractString})::My
         symbol == 'E' && push!(goals, (r, c));
         symbol == 'K' && (key_count += 1);
     end
-    # Check the start, exit, and keycard counts -
+    # Check the start, exit, and CornellID counts -
     length(starts) == 1 || throw(ArgumentError("the map must contain exactly one S"));
     length(goals) == 1 || throw(ArgumentError("the map must contain exactly one E"));
     key_count <= 1 || throw(ArgumentError("the map may contain at most one K"));

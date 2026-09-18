@@ -1,9 +1,9 @@
-using Test # public assertions and per-check error reporting
+using Test # compare function results with expected values and report failures
 isdefined(@__MODULE__, :OlinEscape) || Base.include(@__MODULE__, joinpath(@__DIR__, "Include.jl"));
 isdefined(@__MODULE__, :PS2Checks) || Base.include(@__MODULE__, joinpath(@__DIR__, "test_support.jl"));
 using .PS2Checks; # compare returned neighbors and validate complete routes
 
-@testset verbose=true "PS2 Part 1 (24 checks)" begin
+@testset verbose=true "PS2 Part 1 (24 tests)" begin
     @testset "Geometric neighbors (8)" begin
         @test matches_neighbors(neighbors(build(MyMazeModel, ["S..", "...", "..E"]), (1, 1)), [(1, 2), (2, 1)])
         @test matches_neighbors(neighbors(build(MyMazeModel, ["S..", "...", "..E"]), (2, 2)), [(1, 2), (3, 2), (2, 1), (2, 3)])

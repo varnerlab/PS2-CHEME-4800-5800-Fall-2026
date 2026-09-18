@@ -1,13 +1,13 @@
-# PS2: Escape from Olin — The Missing Keycard
+# PS2: Escape from Olin — The Missing CornellID
 
-Problem set 2 connects the stacks and queues from Week 3 with the graph searches
-from Week 4. You will turn a maze into a graph, use a queue to find a shortest
-escape route, and change the definition of a search state when a locked door
-makes your available moves depend on whether you have collected a keycard.
+Problem set 2 connects the queues from Week 3 with breadth-first search from
+Week 4. You will write a program that reads a maze and returns a route to its
+exit with the fewest moves. Then you will extend the search to handle locked
+doors, where the available moves depend on whether you have collected a CornellID.
 
 ## Logistics
 
-- **Dates:** Released Saturday, September 19, 2026. Submit a ZIP archive to
+- **Dates:** Release: Saturday, September 19, 2026. Submit a ZIP archive to
   Canvas by **11:59 PM ET on Saturday, October 3, 2026**.
 - **Infinite-revision policy:** You must submit something by the initial
   deadline to participate. After that deadline, eligible students may revise
@@ -22,7 +22,8 @@ makes your available moves depend on whether you have collected a keycard.
   documentation, AI tools, and internet resources. You are responsible for
   understanding and explaining your submitted implementation.
 - **Grading:** The maximum score is `4`; see the
-  [grading rubric](RUBRIC.md) for the public checks and completion requirements.
+  [grading rubric](RUBRIC.md) for how your test results, code, and written
+  responses determine your score.
 
 ## Getting started
 
@@ -32,40 +33,88 @@ PS1 solution or the course repository.
 
 1. Download the `Source code (zip)` archive from the tagged
    [PS2 GitHub release](https://github.com/varnerlab/PS2-CHEME-4800-5800-Fall-2026/releases/tag/ps2-cheme-4800-5800-2026.1)
-   and extract it completely.
-2. Open the extracted folder in VS Code. Open a terminal in the folder
-   containing this file and [`check_submission.jl`](check_submission.jl).
-3. Complete the four functions in [`src/Compute.jl`](src/Compute.jl). Keep any
-   additional solution helpers inside [`src`](src) and load them from that file.
+   and extract it.
+2. In VS Code, open the extracted folder containing
+   [`Project.toml`](Project.toml), `README.md`, and
+   [`check_submission.jl`](check_submission.jl). This is the PS2 assignment
+   root. Open a terminal in the assignment root and run all shell commands
+   from the assignment root.
+3. Complete the implementation of the four functions in
+   [`src/Compute.jl`](src/Compute.jl). Keep any additional helper files inside
+   [`src`](src) and load the helper files from [`Include.jl`](Include.jl).
+   All library-file `include(...)` calls belong in `Include.jl`.
 4. Answer the three questions in [`responses.md`](responses.md).
-5. Run the public checks as you work:
+5. Run [`check_submission.jl`](check_submission.jl) to test your implementation
+   as you work. The script runs [`testme_part_1.jl`](testme_part_1.jl) and
+   [`testme_part_2.jl`](testme_part_2.jl):
 
    ```bash
    julia --startup-file=no check_submission.jl
    ```
 
-The starter functions intentionally raise errors. The checks are expected to
-fail until you implement them. Do not edit the tests,
-[`test_support.jl`](test_support.jl), the checker, or the map files to make an
+Each test script calls your functions with example inputs and compares the
+results with the assignment requirements:
+
+| Test script | What the 24 tests cover |
+|---|---|
+| [`testme_part_1.jl`](testme_part_1.jl) | `neighbors` and `escape_part_1`: adjacent cells, shortest routes, unreachable exits, invalid inputs, preserving the map, and repeated calls on different mazes. |
+| [`testme_part_2.jl`](testme_part_2.jl) | `nextstates` and `escape_part_2`: CornellID pickup, door access, shortest routes, unreachable exits, invalid states, preserving the map, and repeated calls on different mazes. |
+
+The four starter functions in `src/Compute.jl` intentionally raise errors.
+Tests will fail until you supply your implementation of the four functions.
+Do not edit [`testme_part_1.jl`](testme_part_1.jl),
+[`testme_part_2.jl`](testme_part_2.jl), [`test_support.jl`](test_support.jl),
+[`check_submission.jl`](check_submission.jl), or the map files to make an
 incomplete solution appear to pass.
 
 ## The story
 
-It is late in Olin, and you are ready to go home. The building
-directory has been replaced by a text file. Can you write a program to turn that file
-into a route to the exit?
+It is late in Olin, you have finished working in the lab, and you are ready to
+go home. You're tired and disoriented, the building seems like a maze of corridors and rooms. You have
+a floor plan showing your starting location, the walls, and the exit. Your task
+is to write a program that uses that floor plan to find a route to the exit
+with the fewest moves.
 
-The first map contains only walls and open corridors. The second introduces a
-locked door, and the keycard is in a side room. Finding the card may require
-walking away from the exit and returning through a corridor you have already
-visited. These maps are fictional puzzles, not actual floor plans of Olin Hall.
+You will develop the program in two parts.
 
-![Fictional maze with a side room containing the keycard and a locked door on the corridor to the exit.](figs/olin-keycard.svg)
+* In **Part 1**, there are no locked
+doors, so the program only needs to track your location as it searches.
+* In **Part 2**, some routes pass through locked doors that use your CornellID
+for access. You start without your CornellID, but its location is marked on the
+floor plan. Reaching the exit may require a detour to collect your CornellID and
+then a return through a corridor you have already visited. The program must now
+track both your location and whether you have the card.
 
 ## Reading the map
 
-Each line of a map file is one row. All rows have the same number of characters.
-The supplied [map reader](src/Files.jl) returns a
+Each part of PS2 has its own solver: [the `escape_part_1(...)` function](src/Compute.jl)
+for Part 1 and [the `escape_part_2(...)` function](src/Compute.jl) for Part 2.
+
+Test each solver on its part's small floor plan, where you can check the route
+by hand, then on its part's larger floor plan. The input files are in the
+[`data`](data) directory:
+
+| Assignment part | Small example | Larger test maze |
+|---|---|---|
+| Part 1: corridors without locked doors | [`test_part_1.txt`](data/test_part_1.txt) | [`production_part_1.txt`](data/production_part_1.txt) |
+| Part 2: corridors, a CornellID, and a locked door | [`test_part_2.txt`](data/test_part_2.txt) | [`production_part_2.txt`](data/production_part_2.txt) |
+
+The [`testme_part_1.jl`](testme_part_1.jl) script runs `escape_part_1` on both
+Part 1 map files. The [`testme_part_2.jl`](testme_part_2.jl) script runs
+`escape_part_2` on both Part 2 map files. Both scripts also test small mazes
+defined within the scripts.
+
+The [`check_submission.jl`](check_submission.jl) script runs both
+`testme_part_1.jl` and `testme_part_2.jl`, prints the test results, and writes
+the results and file hashes to `MANIFEST.txt`. See
+[Checking and submitting your work](#checking-and-submitting-your-work) for
+the submission instructions.
+
+### Maze file format
+
+Each line of a maze file is one row of the maze, and each character is one cell.
+All rows have the same number of characters. The supplied
+[map reader](src/Files.jl) returns a
 [`MyMazeModel`](src/Types.jl) with a character matrix `cells` and two positions,
 `start` and `goal`.
 
@@ -75,12 +124,15 @@ The supplied [map reader](src/Files.jl) returns a
 | `.` | Open floor | You may enter this cell. |
 | `S` | Start | Begin here; you may return later. |
 | `E` | Exit | The route ends when you reach this cell. |
-| `K` | Keycard | Entering this cell automatically collects the card. |
-| `D` | Locked door | You may enter only if you already have the card. |
+| `K` | CornellID | Entering this cell automatically collects your CornellID. |
+| `D` | Locked door | You may enter only if you already have your CornellID. |
 
 A position is `(row, column)`, using Julia's one-based indices. Row numbers
 increase downward; column numbers increase to the right. For example, `(2, 4)`
 means row 2, column 4, and its symbol is `maze.cells[2, 4]`.
+The ASCII examples label rows on the left and columns across the top.
+The labels and spaces between cells are added for readability; the map files
+contain only the maze characters.
 
 You may move one cell **up, down, left, or right**. Diagonal moves, moves through
 walls, and moves outside the map are forbidden. Each legal move costs one.
@@ -98,19 +150,24 @@ discoveries and card possession in separate collections.
 
 ## Part 1: Find the shortest escape route
 
-In this part, your maps contain only `#`, `.`, `S`, and `E`. Represent each
-non-wall position as a graph vertex and each legal move as an edge. You do not
-need to construct or store every edge before searching; compute the neighbors
-of a position when the search reaches it.
+In this part, implement the search for mazes without a CornellID to collect or
+doors to unlock.
+These maps contain only `#`, `.`, `S`, and `E`. Represent each non-wall position
+as a graph vertex and each legal move as an edge. Compute the neighbors of a
+position when the search reaches it; you do not need to store the entire graph
+before beginning the search.
 
-For example, [`data/test_part_1.txt`](data/test_part_1.txt) contains:
+Start with the small Part 1 example,
+[`data/test_part_1.txt`](data/test_part_1.txt):
 
 ```text
-#########
-#S..#..E#
-#.#.#.#.#
-#.......#
-#########
+      column
+        1  2  3  4  5  6  7  8  9
+row 1   #  #  #  #  #  #  #  #  #
+    2   #  S  .  .  #  .  .  E  #
+    3   #  .  #  .  #  .  #  .  #
+    4   #  .  .  .  .  .  .  .  #
+    5   #  #  #  #  #  #  #  #  #
 ```
 
 The start is `(2, 2)` and the exit is `(2, 8)`. The wall between them prevents
@@ -119,23 +176,25 @@ a straight walk across row 2. A shortest escape takes **10 moves** and contains
 
 Complete two functions in [`src/Compute.jl`](src/Compute.jl):
 
-1. **The `neighbors(maze, position)` function** returns a `Vector{Position}`
-   containing the in-bounds, non-wall cells one orthogonal move from `position`.
+1. **[The `neighbors(maze, position)` function](src/Compute.jl)** returns a
+   `Vector{Position}` containing the in-bounds, non-wall cells one orthogonal
+   move from `position`.
    Return each neighbor once, in any order. Return an empty vector when no move
    is possible. Throw a descriptive `ArgumentError` if the given position is
    outside the map or is itself a wall.
 
-   This function checks geometry only. Treat `K` and `D` as non-wall cells too;
-   Part 2 will decide which geometrically possible moves are legal.
+   The `neighbors` function checks geometry only. Treat `K` and `D` as non-wall
+   cells too; Part 2 will decide which geometrically possible moves are legal.
 
-2. **The `escape_part_1(maze)` function** uses breadth-first search to return a
-   shortest route as a `Vector{Position}`. Include the start and exit, in travel
+2. **[The `escape_part_1(maze)` function](src/Compute.jl)** uses breadth-first
+   search to return a shortest route as a `Vector{Position}`. Include the start and exit, in travel
    order. Return `nothing` if the exit is unreachable. Throw a descriptive
    `ArgumentError` if the map contains any `K` or `D` cell, because those symbols
    require Part 2's state representation.
 
-Use the supplied [`MyQueue`](src/Queue.jl) interface to manage the search
-frontier. Its operations are the same as in the Week 3 lecture:
+Use the supplied [`MyQueue`](src/Queue.jl) interface to hold discovered positions
+waiting to be explored. This collection is called the search frontier. The
+queue operations are the same as in the Week 3 lecture:
 
 ```julia
 queue = MyQueue{Position}();
@@ -147,13 +206,16 @@ Use `isempty(queue)` before removing an item. The queue's fields are internal;
 use its public operations rather than accessing its storage directly.
 
 Your search needs a record of discovered positions and predecessor links.
+For each discovered position except the start, its predecessor is the position
+from which the search first reached it.
 Mark a position as discovered when you add it to the queue, so two different
 parents cannot enqueue the same position. When you find the exit, follow the
 predecessors back to the start and reverse that sequence. A traversal order is
 not an escape route: consecutive entries in the returned route must be joined
 by legal moves.
 
-Run the Part 1 checks with:
+To test `neighbors` and `escape_part_1`, run
+[`testme_part_1.jl`](testme_part_1.jl):
 
 ```bash
 julia --startup-file=no testme_part_1.jl
@@ -163,76 +225,87 @@ The larger [`data/production_part_1.txt`](data/production_part_1.txt) map has a
 minimum escape length of **84 moves**. The tests accept any route achieving
 the minimum; they do not prescribe a neighbor ordering or a particular route.
 
-## Part 2: Collect the missing keycard
+## Part 2: Collect the missing CornellID
 
-In this part, a map may also contain `K` and `D`. Start without the card.
-Collecting it is automatic when you enter `K`, costs no extra move, and lasts
-for the rest of the route. The card is reusable and opens every door in the
-map. Traversing an unlocked door costs one move, just like entering a floor
-cell. You do not need to collect the card when an escape route avoids all doors.
+Now extend the route finder to handle a CornellID and locked doors. The Part 2
+maps may also contain `K` and `D`. Start without the card. Entering `K` collects
+it automatically, with no extra move, and you keep it for the rest of the route.
+The card is reusable and opens every door in the map. Entering a door cell
+while carrying the card costs one move, just like entering a floor cell.
+You do not need to collect the card when an escape route avoids all doors.
 
-The small map in [`data/test_part_2.txt`](data/test_part_2.txt) is:
+Start with the small Part 2 example,
+[`data/test_part_2.txt`](data/test_part_2.txt):
 
 ```text
-###########
-#S....D..E#
-###.#######
-#K..#######
-###########
+      column
+        1  2  3  4  5  6  7  8  9 10 11
+row 1   #  #  #  #  #  #  #  #  #  #  #
+    2   #  S  .  .  .  .  D  .  .  E  #
+    3   #  #  #  .  #  #  #  #  #  #  #
+    4   #  K  .  .  #  #  #  #  #  #  #
+    5   #  #  #  #  #  #  #  #  #  #  #
 ```
 
-The keycard is at `(4, 2)`. To collect it, you must leave the main corridor at
-`(2, 4)`, visit the side room, and return to that same junction. A shortest
-escape takes **16 moves**.
+In this maze, `D` blocks the corridor from `S` to `E`, and your CornellID `K`
+is at `(4, 2)`. From `S`, move right to the junction at `(2, 4)`, down to row 4,
+and left to collect `K`. Return to `(2, 4)`, then follow row 2 to the right,
+through `D` to `E`. A shortest escape takes **16 moves**. You visit the junction
+twice: once without your CornellID and once carrying it.
 
 > **What identifies a search state?**
 >
 > In Part 1, your location determines all possible next moves. In Part 2, door
-> access also depends on whether you carry the keycard. Use
-> `(row, column, has_keycard)` as the graph vertex, where `has_keycard` is a
+> access also depends on whether you have your CornellID. Use
+> `(row, column, has_cornell_id)` as the graph vertex, where `has_cornell_id` is a
 > Boolean value. The states `(2, 4, false)` and `(2, 4, true)` describe the same
 > physical junction with different access to the rest of the map. Your queue,
 > discovered set, and predecessor dictionary must distinguish those states.
 
-The supplied alias `EscapeState` names the tuple type `Tuple{Int, Int, Bool}`.
+The supplied [`EscapeState`](src/Types.jl) alias names the tuple type
+`Tuple{Int, Int, Bool}`.
 States describe your situation **after entering the cell**, so any state on
 `K` must already carry the card. Do not erase `K` or change `D` in the map;
 the state records their effect on a particular route.
 
 Complete the remaining functions in [`src/Compute.jl`](src/Compute.jl):
 
-1. **The `nextstates(maze, state)` function** returns a `Vector{EscapeState}`
-   containing every distinct legal state after one move, in any order. Use
-   `neighbors` for geometric candidates, reject entry to a door without the
-   card, and update card possession when entering `K`. Once true, the flag
-   remains true.
+1. **[The `nextstates(maze, state)` function](src/Compute.jl)** returns a
+   `Vector{EscapeState}` containing every distinct legal state after one move,
+   in any order. Use [the `neighbors(...)` function](src/Compute.jl) for geometric
+   candidates, reject entry to a door without the card, and update card possession
+   when entering `K`. Once true, the flag remains true.
 
    Throw `ArgumentError` if the current position is outside the map or is a
    wall, or if the current cell is `K` or `D` while the flag is `false`. You
    only need to check this local validity; you need not prove that a supplied
    state could actually be reached from `S`.
 
-2. **The `escape_part_2(maze)` function** uses breadth-first search over full
-   states and returns a shortest route as a `Vector{EscapeState}`. Begin with
+2. **[The `escape_part_2(maze)` function](src/Compute.jl)** uses breadth-first
+   search over full states and returns a shortest route as a `Vector{EscapeState}`. Begin with
    `(maze.start[1], maze.start[2], false)` and end at the exit with either flag.
-   Use `MyQueue{EscapeState}` and `nextstates`. Return `nothing` when the exit
-   is unreachable, including when the only keycard is behind a required locked
-   door. This function must also handle ordinary maps without a key or door.
+   Use [`MyQueue{EscapeState}`](src/Queue.jl) and
+   [the `nextstates(...)` function](src/Compute.jl). Return `nothing` when the exit
+   is unreachable, including when the only CornellID is behind a required locked
+   door. The `escape_part_2` function must also handle ordinary maps without a
+   CornellID or door.
 
 You may reuse private search or route-reconstruction helpers between the two
-parts. The two public functions must retain their documented input and output
-contracts. A route may revisit a physical position with a different card flag;
-that does not repeat a vertex in the state graph.
+parts. The `escape_part_1` and `escape_part_2` functions must retain their
+documented input and output contracts. A route may revisit a physical position
+with a different card flag; that does not repeat a vertex in the state graph.
 
-Run the Part 2 checks with:
+To test `nextstates` and `escape_part_2`, run
+[`testme_part_2.jl`](testme_part_2.jl):
 
 ```bash
 julia --startup-file=no testme_part_2.jl
 ```
 
 The larger [`data/production_part_2.txt`](data/production_part_2.txt) map requires
-**178 moves** for a shortest escape. As in Part 1, checks validate the entire
-returned route, its endpoints, its legal moves, and its minimum length.
+**178 moves** for a shortest escape. The route tests in `testme_part_2.jl`
+verify the returned route's start and exit, every move, CornellID possession,
+and the minimum number of moves.
 
 ## Display your escape route
 
@@ -269,26 +342,32 @@ Complete the three prompts in [`responses.md`](responses.md). A short paragraph
 per question is enough. Explain why the state must include card possession,
 why the queue finds a route with the fewest moves, and how many states the
 search might discover. These explanations are part of the completion review;
-the checker does not grade them automatically.
+`check_submission.jl` does not grade the written responses automatically.
 
 ## Checking and submitting your work
 
-Run [`check_submission.jl`](check_submission.jl) from the problem-set folder:
+Run [`check_submission.jl`](check_submission.jl) from the PS2 assignment folder
+containing [`Project.toml`](Project.toml), `README.md`, and `check_submission.jl`:
 
 ```bash
 julia --startup-file=no check_submission.jl
 ```
 
-The checker runs all **48 public checks** and writes `MANIFEST.txt` containing
-test outcomes and SHA-256 digests of your source files and written responses.
-**It does not connect to Canvas or upload your work.** Passing all public checks
-leaves the final score pending the completion review in [RUBRIC.md](RUBRIC.md).
+The [`check_submission.jl`](check_submission.jl) script runs
+[`testme_part_1.jl`](testme_part_1.jl) and
+[`testme_part_2.jl`](testme_part_2.jl), with **24 tests per script and 48 tests
+total**. It prints the results and writes `MANIFEST.txt` containing test
+outcomes and SHA-256 digests of your source files and written responses.
+**The `check_submission.jl` script does not connect to Canvas or upload your
+work.** After all 48 tests pass, your code, documentation, and written
+responses still require the instructor review described in [RUBRIC.md](RUBRIC.md).
 
 Zip the entire problem-set folder, including your source files, maps,
-[`responses.md`](responses.md), and the generated `MANIFEST.txt`. Rename it
+[`responses.md`](responses.md), and the generated `MANIFEST.txt`. Name the ZIP
+archive
 `CHEME-4800-5800-PS2-<your netid>.zip`, replacing the complete placeholder,
 including angle brackets, with your NetID. For example, `abc123` submits
-`CHEME-4800-5800-PS2-abc123.zip`. Upload it to the PS2 Canvas assignment.
+`CHEME-4800-5800-PS2-abc123.zip`. Upload the ZIP archive to the PS2 Canvas assignment.
 
 If you cannot resolve every failure by the deadline, submit your current work
 anyway. Partial solutions earn partial credit, and an initial submission is

@@ -3,7 +3,7 @@ include(joinpath(@__DIR__, "Include.jl")); # load the model, student solvers, an
 # Read the command-line request -
 length(ARGS) in (2, 3) || error("Usage: julia --startup-file=no runmaze.jl <1|2> <map.txt> [output.svg]");
 ARGS[1] in ("1", "2") || error("the part must be 1 or 2");
-part = parse(Int, ARGS[1]); # select the ordinary or keycard search
+part = parse(Int, ARGS[1]); # select the ordinary or Part 2 search
 maze = readmaze(ARGS[2]); # map path supplied by the caller
 
 # Compute the route -

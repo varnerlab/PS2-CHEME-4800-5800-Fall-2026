@@ -1,11 +1,11 @@
-# Local check-and-package helper. Run from the repository root:
+# Test the PS2 implementation and write MANIFEST.txt. Run from the assignment root:
 #
 #   julia --startup-file=no check_submission.jl
 #
-# The script runs both test suites (a partial solution is fine; failures are
-# reported, not fatal), then writes MANIFEST.txt with a SHA-256 digest of every
-# file in src/ and of responses.md when present. It does not connect to Canvas
-# or upload the submission. The final guidance follows the public-test results.
+# Run testme_part_1.jl and testme_part_2.jl, then write MANIFEST.txt with the
+# test results and SHA-256 digests of every file in src/ and of responses.md
+# when present. Test failures are reported without stopping the submission
+# instructions. No files are uploaded to Canvas.
 
 import Dates # timestamp written to the submission manifest
 using SHA    # SHA-256 digests used to identify the submitted source files
@@ -26,11 +26,12 @@ const _SUMMARY_STATUS = Dict(
     _rootcause(caught)
 
 Remove nested `LoadError` wrappers so the checker can distinguish failed test
-assertions from syntax or load errors that prevent a test suite from running.
+assertions from syntax or load errors that prevent a test script from running.
 
 ### Arguments
 
-- `caught`: The exception captured while including a public test suite.
+- `caught`: The exception captured while running `testme_part_1.jl` or
+  `testme_part_2.jl`.
 
 ### Returns
 
@@ -48,24 +49,24 @@ end
 # Explain the boundary between this local check and the Canvas submission -
 println("""
 ==================== important ====================
-This script checks your work and prepares MANIFEST.txt.
-It does NOT upload anything to Canvas.
+check_submission.jl runs testme_part_1.jl and testme_part_2.jl, then writes MANIFEST.txt.
+check_submission.jl does NOT upload anything to Canvas.
 You must still create a zip archive and upload it through Canvas yourself.
 """);
 
-# Run both public test suites and retain their completion status -
+# Run testme_part_1.jl and testme_part_2.jl and record each script's result -
 results = Dict{String, Symbol}(); # test filename => :passed, :failed, or :error
 for part ∈ ["testme_part_1.jl", "testme_part_2.jl"]
     println("\n==================== running $(part) ====================");
     status = :passed; # optimistic status, changed if `include(...)` propagates a failure
     try
-        sandbox = Module(gensym(:PS2Part)); # each suite gets a fresh copy of the source definitions
+        sandbox = Module(gensym(:PS2Part)); # each test script gets a fresh copy of the source definitions
         Base.include(sandbox, joinpath(@__DIR__, part));
     catch caught
         cause = _rootcause(caught); # inspect the original exception beneath nested include wrappers
         if cause isa Test.TestSetException
-            status = :failed; # Test has already printed the individual failed checks above
-            println(stderr, "\n$(part): one or more checks failed; review the test output above.");
+            status = :failed; # Test has already printed the individual failed tests
+            println(stderr, "\n$(part): one or more tests failed; review the test output above.");
         else
             status = :error; # make syntax, include, and setup failures visible instead of swallowing them
             println(stderr, "\n$(part) could not run because of the following error:");
@@ -73,7 +74,7 @@ for part ∈ ["testme_part_1.jl", "testme_part_2.jl"]
             println(stderr);
         end
     end
-    results[part] = status; # preserve one unambiguous status for each public test suite
+    results[part] = status; # preserve one status for each test script
 end
 
 # Write the submission manifest -
@@ -119,27 +120,29 @@ for part ∈ sort(collect(keys(results)))
 end
 println("wrote ", manifest_path);
 println("Written responses and documentation are reviewed separately; this script does not grade them.");
-all_suites_passed = all(status -> status == :passed, values(results)); # both suites must finish successfully
-any_suite_errored = any(status -> status == :error, values(results)); # at least one suite could not complete setup
+all_suites_passed = all(status -> status == :passed, values(results)); # both test scripts must finish successfully
+any_suite_errored = any(status -> status == :error, values(results)); # at least one test script could not complete setup
 
-# Give advice appropriate to the public-test result -
+# Explain the next steps based on the test results -
 if all_suites_passed == true
     println("""
 
 Status: READY TO PACKAGE
-All 48 public checks passed. Complete responses.md and review RUBRIC.md.
+All 48 tests in testme_part_1.jl and testme_part_2.jl passed.
+Complete responses.md and review RUBRIC.md.
 The final score remains pending completion review. Follow the steps below.
 """);
 elseif any_suite_errored == true
     println("""
 
 Status: TESTS COULD NOT RUN
-At least one public test suite stopped because of a syntax, include, or setup error.
+testme_part_1.jl or testme_part_2.jl could not finish because of a syntax,
+file-loading, or setup error. See the result for each script above.
 
 Recommended next steps:
 1. Read the error and source location printed above.
 2. Fix that error before interpreting any other test results.
-3. Run this script again and check the new results.
+3. Run check_submission.jl again and read the new results.
 
 Deadline safeguard: If you cannot fix every error before the deadline, submit
 your current work anyway. A submission is required for the infinite-revision
@@ -148,13 +151,13 @@ policy. Do not miss the deadline solely because the tests cannot run.
 else
     println("""
 
-Status: CHECKS NEED ATTENTION
-One or more public test suites failed.
+Status: TESTS NEED ATTENTION
+One or more tests in testme_part_1.jl or testme_part_2.jl failed.
 
 Recommended next steps:
 1. Review the failure messages above.
 2. Fix as many issues as you can.
-3. Run this script again and check the new results.
+3. Run check_submission.jl again and read the new results.
 
 Deadline safeguard: If you cannot fix every failure before the deadline, submit
 your current work anyway. A submission is required for partial credit and for the
@@ -164,10 +167,10 @@ end
 
 # Repeat the manual Canvas boundary immediately before the upload instructions -
 println("""
-This script has NOT uploaded anything to Canvas.
+check_submission.jl has NOT uploaded anything to Canvas.
 
 Canvas submission steps:
-1. Zip the whole problem-set folder (the folder holding this script):
+1. Zip the assignment folder containing Project.toml, README.md, and check_submission.jl:
    - macOS: right-click the folder in Finder and choose "Compress".
    - Windows: right-click the folder and choose "Send to" -> "Compressed (zipped) folder".
 2. Rename the zip to CHEME-4800-5800-PS2-<your netid>.zip

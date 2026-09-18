@@ -16,8 +16,8 @@ not call the student's neighbor, state-transition, queue, or search functions.
 ### Arguments
 
 - `maze::MyMazeModel`: A small validated map. Its cell matrix is not modified.
-- `part::Int`: `1` for an ordinary map without keycards or doors, or `2` for
-  a map using the keycard rules.
+- `part::Int`: `1` for an ordinary map without a CornellID or doors, or `2` for
+  a map using the CornellID access rules.
 
 ### Returns
 
@@ -126,7 +126,7 @@ end
         @test !valid_part_1(build(MyMazeModel, ["SE"]), Position[])
     end
 
-    @testset "Keycard example and rendering" begin
+    @testset "CornellID example and rendering" begin
         maze = readmaze(joinpath(ARGS[1], "data", "test_part_2.txt"));
         route = escape_part_2(maze);
         @test (2, 4, false) in route && (2, 4, true) in route

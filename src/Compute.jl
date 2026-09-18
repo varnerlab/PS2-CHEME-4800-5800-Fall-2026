@@ -1,5 +1,6 @@
-# Complete the four public functions below. You may add private helpers in this
-# file or include other helpers from src/. Keep their contracts documented.
+# Complete the four public functions below. You may add private helpers in
+# Compute.jl or separate files inside src/. Load helper files from Include.jl;
+# all library-file include calls belong in Include.jl. Document helper contracts.
 
 """
     neighbors(maze::MyMazeModel, position::Position) -> Vector{Position}
@@ -81,7 +82,7 @@ possession persists, and the same card works on every door.
 ### Arguments
 
 - `maze::MyMazeModel`: The maze to inspect. Its cell matrix is not modified.
-- `state::EscapeState`: The current `(row, column, has_keycard)`, recorded after
+- `state::EscapeState`: The current `(row, column, has_cornell_id)`, recorded after
   entering the cell. Validate its location and card flag locally; the function
   need not establish whether the state is reachable from the start.
 
@@ -94,7 +95,7 @@ possession persists, and the same card works on every door.
 ### Errors
 
 - `ArgumentError`: The current position is outside the map or is a wall, or
-  its cell is `K` or `D` while `has_keycard` is `false`.
+  its cell is `K` or `D` while `has_cornell_id` is `false`.
 """
 function nextstates(maze::MyMazeModel, state::EscapeState)::Vector{EscapeState}
 
@@ -111,12 +112,12 @@ end
     escape_part_2(maze::MyMazeModel) -> Union{Nothing, Vector{EscapeState}}
 
 Find a route with the fewest moves using breadth-first search over full
-`(row, column, has_keycard)` states. Use `MyQueue` for the frontier and
+`(row, column, has_cornell_id)` states. Use `MyQueue` for the frontier and
 `nextstates(...)` for legal moves. Every move has unit cost.
 
 ### Arguments
 
-- `maze::MyMazeModel`: A maze with at most one keycard and any number of doors.
+- `maze::MyMazeModel`: A maze with at most one CornellID and any number of doors.
   Ordinary maps without either symbol are also accepted. The model and its
   cell matrix are not modified.
 

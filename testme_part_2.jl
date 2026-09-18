@@ -1,9 +1,9 @@
-using Test # public assertions and per-check error reporting
+using Test # compare function results with expected values and report failures
 isdefined(@__MODULE__, :OlinEscape) || Base.include(@__MODULE__, joinpath(@__DIR__, "Include.jl"));
 isdefined(@__MODULE__, :PS2Checks) || Base.include(@__MODULE__, joinpath(@__DIR__, "test_support.jl"));
 using .PS2Checks; # compare returned states and validate complete routes
 
-@testset verbose=true "PS2 Part 2 (24 checks)" begin
+@testset verbose=true "PS2 Part 2 (24 tests)" begin
     @testset "Legal state transitions (10)" begin
         @test matches_states(nextstates(build(MyMazeModel, ["S.KDE"]), (1, 2, false)), [(1, 1, false), (1, 3, true)])
         @test matches_states(nextstates(build(MyMazeModel, ["S.KDE"]), (1, 3, true)), [(1, 2, true), (1, 4, true)])
@@ -20,9 +20,9 @@ using .PS2Checks; # compare returned states and validate complete routes
     @testset "Shortest routes through state space (12)" begin
         cases = [
             ("ordinary map also works", ["SE"], 1),
-            ("required door with no key", ["SDE"], nothing),
-            ("key behind the locked door", ["SDKE"], nothing),
-            ("unnecessary keycard", ["S.E", "...", "K.."], 2),
+            ("required door with no CornellID", ["SDE"], nothing),
+            ("CornellID behind the locked door", ["SDKE"], nothing),
+            ("unnecessary CornellID", ["S.E", "...", "K.."], 2),
             ("card works on two doors", ["SKD.DE"], 5),
             ("automatic pickup without a door", ["SKE"], 2),
             ("revisit the start carrying the card", ["K.SDE"], 6),

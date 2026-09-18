@@ -1,6 +1,6 @@
 # PS2 authoring and release notes
 
-**Assignment:** Escape from Olin — The Missing Keycard.
+**Assignment:** Escape from Olin — The Missing CornellID.
 
 **Confirmed dates:** Release September 19, 2026; initial submission due
 October 3, 2026 at 11:59 PM ET. Both dates are Saturdays.
@@ -32,7 +32,7 @@ The initial release targets are:
 
 - Repository: `varnerlab/PS2-CHEME-4800-5800-Fall-2026`.
 - Tag: `ps2-cheme-4800-5800-2026.1`.
-- Release title: `PS2: Escape from Olin — The Missing Keycard`.
+- Release title: `PS2: Escape from Olin — The Missing CornellID`.
 
 Keep the reference solution untracked for the initial release; `solution/` is
 listed in `.gitignore`. The `.gitattributes` file excludes instructor material
@@ -47,26 +47,30 @@ target the planned initial tag; publish that release before posting the Canvas
 description. Students still ZIP their completed work and upload it to Canvas,
 as they did for PS1.
 
-## What the checks establish
+## What the test scripts verify
 
-The 48 public grading checks are split into 24 per part. Complete-route checks
-validate the route against the original cell matrix, independently of the
+The [`testme_part_1.jl`](../testme_part_1.jl) and
+[`testme_part_2.jl`](../testme_part_2.jl) scripts contain 24 tests each, for 48
+tests used in grading. Route tests validate the route against the original
+cell matrix, independently of the
 student's neighbor functions, and compare its length with a known minimum.
 They accept all equally optimal routes and do not enforce neighbor ordering.
-The public data include cycles, boundaries, unreachable exits, optional keys,
+The test mazes include cycles, boundaries, unreachable exits, optional keys,
 a key behind a locked door, reusable cards, and a required return through an
 already visited junction.
 
-The development suite adds 151 checks of supplied infrastructure, independent
-route validation, and reference behavior. Of these, 120 compare small generated
-maps with a solver that explicitly constructs states and edges and uses repeated
-edge relaxation, rather than the reference implementation's queue search.
-These are assignment-development checks, not hidden grading requirements.
+The [`verify_solution.jl`](verify_solution.jl) script adds 151 tests of the
+supplied code, route validation, and reference solution. Of these, 120 compare
+small generated maps with a solver that explicitly constructs states and edges
+and uses repeated edge relaxation, rather than the reference implementation's
+queue search. The tests in `verify_solution.jl` validate the assignment and do
+not affect student grades.
 
-The validation driver also checks the command-line renderer and complete,
-unfinished, Part-1-only, and syntax-error submissions. The checker intentionally
-finishes and writes a manifest even after failed tests. Its process exit code
-alone does not certify a completed submission; read its printed status.
+The [`validate.py`](validate.py) script also tests the command-line renderer and
+complete, unfinished, Part-1-only, and syntax-error submissions. The
+[`check_submission.jl`](../check_submission.jl) script finishes and writes a
+manifest even after failed tests. Its process exit code alone does not certify
+a completed submission; read its printed status.
 
 ## Maps and discussion review
 
@@ -76,12 +80,14 @@ The four maps are synthetic. Their source and digests are described in
 their bytes; changing the generator requires recomputing move counts, digests,
 public expected results, and the assignment text.
 
-The small keycard map forces the route to visit `(2, 4)` first without the card
+The small Part 2 map forces the route to visit `(2, 4)` first without the card
 and then with it. The three discussion prompts assess state identity, the queue's
 shortest-path guarantee, and the bound of at most `P` or `2P` states for `P`
 non-wall cells. Sample responses are in the private solution directory.
 
-For grading, copy the submitted `src` tree and `responses.md` into a clean
-student distribution and use the original public tests. Apply the completion
-review only after all 48 checks pass. Do not assign a provisional score of `3`
+For grading, copy the submitted `src` tree, `Include.jl`, and `responses.md`
+into a clean student distribution and run the released `testme_part_1.jl` and
+`testme_part_2.jl` scripts. Preserve the submitted `Include.jl` so additional
+helper files are loaded. Apply the completion review only after all 48 tests
+pass. Do not assign a provisional score of `3`
 while that review is pending.

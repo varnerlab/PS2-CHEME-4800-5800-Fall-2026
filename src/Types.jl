@@ -11,8 +11,8 @@ const Position = Tuple{Int, Int};
     EscapeState
 
 Alias for `Tuple{Int, Int, Bool}`, representing a Part 2 search vertex as
-`(row, column, has_keycard)`. The first two entries locate a cell using the
-`Position` convention. The Boolean records card possession after entering that
+`(row, column, has_cornell_id)`. The first two entries locate a cell using the
+`Position` convention. The Boolean records CornellID possession after entering that
 cell; it becomes `true` on entering `K` and remains `true` for the rest of a route.
 """
 const EscapeState = Tuple{Int, Int, Bool};

@@ -1,5 +1,6 @@
-# Public checks validate routes directly from the map. They do not call the
-# student's neighbors or nextstates to decide whether a returned move is legal.
+# Support testme_part_1.jl and testme_part_2.jl by validating routes directly
+# from the map. Route validation does not call the student's neighbors or
+# nextstates functions to decide whether a returned move is legal.
 module PS2Checks
 
 using ..OlinEscape: Position, EscapeState, MyMazeModel; # assignment types used to check return contracts
@@ -170,7 +171,7 @@ move count, using a copy of the original map for validation.
 - Exceptions raised by `solver(maze)` propagate to the calling test.
 """
 function solves_part_2(solver, maze, expected)::Bool
-    original = deepcopy(maze); # retain the map and keycard locations before calling the solver
+    original = deepcopy(maze); # retain the map and CornellID locations before calling the solver
     route = solver(maze);
     expected === nothing && return route === nothing;
     return valid_part_2(original, route) && length(route) - 1 == expected;

@@ -51,7 +51,7 @@ def main():
         starter = (tree / "src/Compute.jl").read_text()
         solution = (ROOT / "solution/src/Compute.jl").read_text()
 
-        # Confirm that all public checks can run against a completed submission -
+        # Confirm that testme_part_1.jl and testme_part_2.jl pass for the reference solution -
         (tree / "src/Compute.jl").write_text(solution)
         for part in (1, 2):
             output = run(tree, tree / f"testme_part_{part}.jl", label=f"solution-part-{part}")
@@ -59,7 +59,7 @@ def main():
                 raise RuntimeError(f"Part {part} did not report 24 passing checks")
         run(tree, ROOT / "instructor/verify_solution.jl", label="development", extra=(tree,))
         output = run(tree, tree / "check_submission.jl", label="solution-checker")
-        assert "All 48 public checks passed" in output
+        assert "All 48 tests in testme_part_1.jl and testme_part_2.jl passed." in output
         manifest = (tree / "MANIFEST.txt").read_text()
         assert manifest.count("all tests passed") == 2 and "responses.md" in manifest
         run(tree, tree / "runmaze.jl", label="solution-cli",
@@ -71,7 +71,7 @@ def main():
         for part in (1, 2):
             run(tree, tree / f"testme_part_{part}.jl", expected=1, label=f"starter-part-{part}")
         output = run(tree, tree / "check_submission.jl", label="starter-checker")
-        assert "CHECKS NEED ATTENTION" in output
+        assert "TESTS NEED ATTENTION" in output
         assert (tree / "MANIFEST.txt").read_text().count("some tests failed") == 2
 
         # A finished Part 1 must still earn its checks when Part 2 is incomplete -

@@ -4,28 +4,30 @@ Name:
 
 NetID:
 
-Write a short paragraph for each question. Use your implementation and the
-supplied maps to make the explanation concrete.
+Write one short paragraph per question. Use examples from your code and the
+supplied maps.
 
-1. **What does a vertex represent?** In the small Part 2 map, explain why the
-   search must distinguish `(2, 4, false)` from `(2, 4, true)`. What can go wrong
-   if the discovered set stores only `(row, column)`? Why is revisiting this
-   physical junction consistent with finding a shortest path in the state graph?
-
-   TODO: Write your response.
-
-2. **Why use a queue?** Explain why first-in, first-out exploration finds a
-   route with the fewest moves in these maps. Would returning the first escape
-   found by depth-first search provide the same guarantee? If some moves took
-   longer than others, with all travel times positive, which Week 4 algorithm
-   would you use to minimize total travel time, and why?
+1. **Why track your CornellID?** In the
+   [small Part 2 map](data/test_part_2.txt), why must the search treat
+   `(2, 4, false)` and `(2, 4, true)` as two states? What can go wrong if the
+   set of discovered states stores only `(row, column)`? Why can a shortest
+   route visit `(2, 4)` twice?
 
    TODO: Write your response.
 
-3. **How much can the search discover?** Let `P` denote the number of non-wall
-   cells in a map, including marked cells. Give an upper bound in terms of `P`
-   for the number of distinct states in each part. Explain why some counted
-   states may be invalid or unreachable and why marking states when they enter
-   the queue prevents duplicate queue entries for the same state.
+2. **Why use a queue?** Explain why breadth-first search with a first-in,
+   first-out queue finds a route with the fewest moves. Would the first route
+   found by depth-first search always have the fewest moves? Explain. If some
+   moves took longer than others, with all travel times greater than zero,
+   which algorithm from Week 4 would find the fastest route? Why?
+
+   TODO: Write your response.
+
+3. **How many states can the search discover?** Let `P` be the number of cells
+   that are not walls, including `S`, `E`, `K`, and `D`. Give an upper bound,
+   in terms of `P`, on the number of states in each part. Why might the search
+   reach fewer states than your bound? Consider walls and the CornellID rules.
+   Explain why recording a state in the discovered set when adding it to the
+   queue prevents the same state from being added twice.
 
    TODO: Write your response.

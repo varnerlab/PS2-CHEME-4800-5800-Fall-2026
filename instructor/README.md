@@ -1,6 +1,6 @@
 # PS2 authoring and release notes
 
-**Assignment:** Escape from Olin — The Missing CornellID.
+**Assignment:** Escape from Olin Hall with a missing CornellID.
 
 **Confirmed dates:** Release September 19, 2026; initial submission due
 October 3, 2026 at 11:59 PM ET. Both dates are Saturdays.
@@ -28,19 +28,39 @@ Use the same distribution workflow as PS1: publish a tagged GitHub release and
 have students download its automatic **Source code (zip)** archive from the
 release's **Assets** section. A separately built or uploaded ZIP is not needed.
 
+The [PS2 release Action](../.github/workflows/release-ps2.yml) follows the weekly
+bundle workflow: pushing a release tag runs validation and creates a **draft**
+GitHub release. The Action checks a temporary Git source archive, including
+the starter functions, supplied code, discussion warnings, map data, and local
+links. It does not require or upload the private reference solution. Run the
+full local validation above before committing and tagging the release.
+
 The initial release targets are:
 
 - Repository: `varnerlab/PS2-CHEME-4800-5800-Fall-2026`.
 - Tag: `ps2-cheme-4800-5800-2026.1`.
-- Release title: `PS2: Escape from Olin — The Missing CornellID`.
+- Release title: `PS2: Escape from Olin Hall with a missing CornellID`.
 
 Keep the reference solution untracked for the initial release; `solution/` is
-listed in `.gitignore`. The `.gitattributes` file excludes instructor material
-and solutions from Git-generated source archives. Tag the validated starter
-commit, then publish the GitHub release for that tag. Later corrections should
-use a new tag and updated instruction links rather than moving the original tag.
+listed in `.gitignore`. The `.gitattributes` file excludes GitHub workflows,
+instructor material, and solutions from Git-generated source archives.
 
-The validation script only creates temporary test copies. It does not create
+After committing the validated starter, check the committed archive and push
+the branch and release tag:
+
+```bash
+python3 instructor/validate_release.py
+git push origin main
+git tag -a ps2-cheme-4800-5800-2026.1 -m "PS2 student assignment"
+git push origin ps2-cheme-4800-5800-2026.1
+```
+
+Wait for the Action to finish, then review the draft release and publish it
+when ready. The release notes come from [release-notes.md](release-notes.md).
+Later corrections should use a new tag and updated instruction links rather
+than moving the original tag.
+
+The local validation scripts only create temporary test copies. They do not create
 a remote repository, tag, GitHub release, or Canvas assignment. The links in
 the student README and [Canvas description](canvas-assignment-description.html)
 target the planned initial tag; publish that release before posting the Canvas
@@ -71,6 +91,22 @@ complete, unfinished, Part-1-only, and syntax-error submissions. The
 [`check_submission.jl`](../check_submission.jl) script finishes and writes a
 manifest even after failed tests. Its process exit code alone does not certify
 a completed submission; read its printed status.
+
+The submission script warns about missing discussion questions, empty answers,
+and TODO placeholders. The [`verify_discussion.jl`](verify_discussion.jl)
+script tests those warnings, including answers with Windows line endings.
+Validation also checks missing and unreadable response files. The manifest
+records SHA-256 digests of `Include.jl`, the files in `src`, and `responses.md`
+when readable.
+The warnings do not grade the writing or change the 48 test results. If code
+passes but discussion answers appear unfinished, the submission status is
+`DISCUSSION QUESTIONS NEED ATTENTION`.
+
+After all 48 tests pass, the submission script displays the student's routes
+through both production maps as ASCII art and saves `outputs/escape-part-1.svg`
+and `outputs/escape-part-2.svg`. Missing discussion answers do not hide the
+routes. A drawing error does not prevent the manifest or submission instructions
+from being written. Validation checks both behaviors.
 
 ## Maps and discussion review
 

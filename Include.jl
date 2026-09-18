@@ -2,23 +2,25 @@
 # Keep all library-file include calls inside the OlinEscape module.
 module OlinEscape
 
+const _SRC_STUDENT_PATH = joinpath(@__DIR__, "src"); # source directory beside Include.jl
+
 # Load the supplied types and utilities -
 # @__DIR__ anchors each source path to the folder containing Include.jl,
 # so loading the code does not depend on the terminal's working directory.
-include(joinpath(@__DIR__, "src", "Types.jl")); # maze model and search-state aliases
-include(joinpath(@__DIR__, "src", "Factory.jl")); # construct and validate map models
-include(joinpath(@__DIR__, "src", "Files.jl")); # read a map from a text file
-include(joinpath(@__DIR__, "src", "Queue.jl")); # supplied first-in, first-out queue
+include(joinpath(_SRC_STUDENT_PATH, "Types.jl")); # maze model and search-state aliases
+include(joinpath(_SRC_STUDENT_PATH, "Factory.jl")); # construct and validate map models
+include(joinpath(_SRC_STUDENT_PATH, "Files.jl")); # read a map from a text file
+include(joinpath(_SRC_STUDENT_PATH, "Queue.jl")); # supplied first-in, first-out queue
 
 # Load optional student helper files -
 # TODO (optional): Add include calls for your helper files here.
 # Store helper files in src/. Replace MyHelpers.jl with your filename and
 # uncomment the example after creating the file. Load dependencies first.
-# include(joinpath(@__DIR__, "src", "MyHelpers.jl"));
+# include(joinpath(_SRC_STUDENT_PATH, "MyHelpers.jl"));
 
 # Load the student solvers and supplied renderers -
-include(joinpath(@__DIR__, "src", "Compute.jl")); # student neighbor and search implementations
-include(joinpath(@__DIR__, "src", "Visualization.jl")); # text and SVG map renderers
+include(joinpath(_SRC_STUDENT_PATH, "Compute.jl")); # student neighbor and search implementations
+include(joinpath(_SRC_STUDENT_PATH, "Visualization.jl")); # text and SVG map renderers
 
 # Export the types and functions used by the tests and runmaze.jl -
 export Position, EscapeState, MyMazeModel, MyQueue;

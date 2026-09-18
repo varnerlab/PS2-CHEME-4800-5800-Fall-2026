@@ -5,7 +5,7 @@
 <html lang="en">
 <head><meta charset="utf-8"><title>PS2: Escape from Olin</title></head>
 <body>
-<h2>Problem Set 2: Escape from Olin — The Missing CornellID</h2>
+<h2>Problem Set 2: Escape from Olin Hall with a missing CornellID</h2>
 <p><strong>Release:</strong> Saturday, September 19, 2026<br>
 <strong>Initial submission deadline:</strong> Saturday, October 3, 2026, at 11:59 PM ET<br>
 <strong>Maximum score:</strong> 4 points</p>
@@ -29,13 +29,18 @@ The assignment uses Julia 1.12.7 and standard libraries only.</p>
 The starter is intentionally incomplete, so the tests initially fail.</p>
 
 <h3>Check and submit</h3>
-<p>From the extracted problem-set folder, run:</p>
+<p>In VS Code, open the extracted assignment folder containing
+<code>Project.toml</code>, <code>README.md</code>, and <code>check_submission.jl</code>.
+Open a terminal in that folder and run:</p>
 <pre><code>julia --startup-file=no check_submission.jl</code></pre>
 <p>The <code>check_submission.jl</code> script runs <code>testme_part_1.jl</code>
 and <code>testme_part_2.jl</code>, with 24 tests per script and 48 tests total,
 and creates <code>MANIFEST.txt</code>. The Part 1 script tests neighboring cells
 and shortest routes. The Part 2 script tests CornellID pickup, door access,
 and shortest routes while tracking whether you have the card.</p>
+<p>The script warns if discussion answers are missing or still contain TODO
+placeholders. After all 48 tests pass, it prints your escape routes through
+both larger mazes and saves drawings in the <code>outputs</code> folder.</p>
 <p>The <code>check_submission.jl</code> script
 <strong>does not upload anything to Canvas</strong>. Written explanations
 and documentation are reviewed separately.</p>

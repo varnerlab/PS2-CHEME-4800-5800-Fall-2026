@@ -3,9 +3,10 @@
 #   julia --startup-file=no check_submission.jl
 #
 # Run testme_part_1.jl and testme_part_2.jl, then write MANIFEST.txt with the
-# test results and SHA-256 digests of every file in src/ and of responses.md
-# when present. Test failures are reported without stopping the submission
-# instructions. No files are uploaded to Canvas.
+# test results and SHA-256 digests of Include.jl, every file in src/, and
+# responses.md when readable. Warn about unanswered discussion questions.
+# After all tests pass, display the student's routes through the two larger mazes. Test
+# failures do not stop the submission instructions. No files are uploaded.
 
 import Dates # timestamp written to the submission manifest
 using SHA    # SHA-256 digests used to identify the submitted source files
@@ -46,22 +47,80 @@ function _rootcause(caught)
     return cause;
 end
 
+"""
+    _discussion_issues(path::AbstractString) -> Vector{String}
+
+Find missing answers and unfinished placeholders in the three numbered
+questions in `responses.md`. Check the answer paragraphs after each question;
+the question text itself does not count as an answer. Do not grade the writing.
+
+### Arguments
+
+- `path::AbstractString`: Path to the student's `responses.md` file.
+
+### Returns
+
+- `Vector{String}`: Messages naming missing questions, empty answers, or
+  remaining placeholders. An empty vector means no unfinished answers were
+  detected; it does not establish that the answers are correct or complete.
+  A missing or unreadable file produces a warning instead of an exception.
+"""
+function _discussion_issues(path::AbstractString)::Vector{String}
+
+    isfile(path) || return ["responses.md is missing. Restore the file and answer all three questions."];
+    text = try
+        replace(read(path, String), "\r\n" => "\n"); # accept Windows and Unix line endings
+    catch
+        return ["responses.md could not be read. Check that the file can be opened."];
+    end
+
+    # Separate each numbered question from its answer -
+    answers = Dict{Int, String}();
+    issues = String[];
+    pattern = r"(?ms)^[ \t]{0,2}([1-3])\.[ \t]+\*\*.*?(?=^[ \t]{0,2}[1-3]\.[ \t]+\*\*|\z)";
+    for section in eachmatch(pattern, text)
+        number = parse(Int, section.captures[1]);
+        if haskey(answers, number)
+            push!(issues, "Question $number appears more than once. Keep one copy of each question.");
+        end
+        paragraphs = split(section.match, r"\n[ \t]*\n"; limit=2);
+        answer = length(paragraphs) == 2 ? paragraphs[2] : "";
+        answers[number] = strip(replace(answer, r"(?s)<!--.*?-->" => "")); # comments are not written answers
+    end
+
+    # Report unfinished answers without guessing whether the reasoning is correct -
+    placeholder = r"(?im)^[ \t]*(?:[-*>][ \t]+)?(?:TODO\b[^\n]*|TBD[.!]?|Write your response[.!]?|Your answer here[.!]?)[ \t]*$";
+    for number in 1:3
+        if !haskey(answers, number)
+            push!(issues, "Question $number is missing. Keep the numbered questions in responses.md.");
+        elseif !occursin(r"[\p{L}\p{N}]", answers[number])
+            push!(issues, "Question $number has no answer. Write your response below the question.");
+        elseif occursin(placeholder, answers[number])
+            push!(issues, "Question $number still has a TODO or answer placeholder. Replace it with your response.");
+        end
+    end
+    return issues;
+end
+
 # Explain the boundary between this local check and the Canvas submission -
 println("""
 ==================== important ====================
 check_submission.jl runs testme_part_1.jl and testme_part_2.jl, then writes MANIFEST.txt.
+It also checks responses.md for unanswered questions.
 check_submission.jl does NOT upload anything to Canvas.
 You must still create a zip archive and upload it through Canvas yourself.
 """);
 
 # Run testme_part_1.jl and testme_part_2.jl and record each script's result -
 results = Dict{String, Symbol}(); # test filename => :passed, :failed, or :error
+tested_modules = Dict{String, Module}(); # reuse the student's code that passed each test script
 for part ∈ ["testme_part_1.jl", "testme_part_2.jl"]
     println("\n==================== running $(part) ====================");
     status = :passed; # optimistic status, changed if `include(...)` propagates a failure
     try
         sandbox = Module(gensym(:PS2Part)); # each test script gets a fresh copy of the source definitions
         Base.include(sandbox, joinpath(@__DIR__, part));
+        tested_modules[part] = sandbox;
     catch caught
         cause = _rootcause(caught); # inspect the original exception beneath nested include wrappers
         if cause isa Test.TestSetException
@@ -77,6 +136,11 @@ for part ∈ ["testme_part_1.jl", "testme_part_2.jl"]
     results[part] = status; # preserve one status for each test script
 end
 
+# Check whether the written responses still need attention -
+response_path = joinpath(@__DIR__, "responses.md");
+discussion_issues = _discussion_issues(response_path);
+discussion_status = isempty(discussion_issues) ? "no unanswered prompts detected" : "NEEDS ATTENTION";
+
 # Write the submission manifest -
 manifest_path = joinpath(@__DIR__, "MANIFEST.txt"); # generated beside this script
 open(manifest_path, "w") do io
@@ -87,9 +151,13 @@ open(manifest_path, "w") do io
     for part ∈ sort(collect(keys(results)))
         println(io, part, ": ", _MANIFEST_STATUS[results[part]]); # sort for reproducible output order
     end
+    println(io, "responses.md: ", discussion_status);
+    for issue in discussion_issues
+        println(io, "  - ", issue);
+    end
 
     # Discover every regular source file, including files inside helper directories -
-    source_files = String[];
+    source_files = [joinpath(@__DIR__, "Include.jl")]; # include student helper-file loading in the fingerprint
     for (directory, _, filenames) ∈ walkdir(joinpath(@__DIR__, "src"))
         for filename ∈ filenames
             file = joinpath(directory, filename);
@@ -98,7 +166,6 @@ open(manifest_path, "w") do io
     end
 
     # Include the written responses in the submission fingerprint -
-    response_path = joinpath(@__DIR__, "responses.md");
     if isfile(response_path)
         push!(source_files, response_path);
     else
@@ -107,7 +174,13 @@ open(manifest_path, "w") do io
 
     # Fingerprint the complete submitted source tree and written responses -
     for file ∈ sort(source_files)
-        digest = bytes2hex(open(sha256, file)); # lowercase hexadecimal SHA-256 digest
+        digest = try
+            bytes2hex(open(sha256, file)); # lowercase hexadecimal SHA-256 digest
+        catch
+            file == response_path || rethrow();
+            println(io, "responses.md: UNREADABLE"); # preserve the discussion warning and submission instructions
+            continue;
+        end
         relative_path = replace(relpath(file, @__DIR__), '\\' => '/'); # stable path separators across platforms
         println(io, digest, "  ", relative_path);
     end
@@ -119,19 +192,24 @@ for part ∈ sort(collect(keys(results)))
     println(part, ": ", _SUMMARY_STATUS[results[part]]);
 end
 println("wrote ", manifest_path);
-println("Written responses and documentation are reviewed separately; this script does not grade them.");
+println("responses.md: ", discussion_status);
+for issue in discussion_issues
+    println("  WARNING: ", issue);
+end
+println("The instructor still reviews your answers and code. This script does not grade the writing.");
 all_suites_passed = all(status -> status == :passed, values(results)); # both test scripts must finish successfully
 any_suite_errored = any(status -> status == :error, values(results)); # at least one test script could not complete setup
 
 # Explain the next steps based on the test results -
 if all_suites_passed == true
-    println("""
-
-Status: READY TO PACKAGE
-All 48 tests in testme_part_1.jl and testme_part_2.jl passed.
-Complete responses.md and review RUBRIC.md.
-The final score remains pending completion review. Follow the steps below.
-""");
+    println("\nAll 48 tests in testme_part_1.jl and testme_part_2.jl passed.");
+    if isempty(discussion_issues)
+        println("Status: READY TO PACKAGE");
+        println("Review your answers and RUBRIC.md before submitting. The final score still requires instructor review.");
+    else
+        println("Status: DISCUSSION QUESTIONS NEED ATTENTION");
+        println("Your code passed the tests. Answer the questions listed above in responses.md before submitting.");
+    end
 elseif any_suite_errored == true
     println("""
 
@@ -163,6 +241,39 @@ Deadline safeguard: If you cannot fix every failure before the deadline, submit
 your current work anyway. A submission is required for partial credit and for the
 infinite-revision policy. Do not miss the deadline solely because a test is failing.
 """);
+end
+
+# Show the routes computed by the student's passing solvers -
+if all_suites_passed
+    println("\n==================== YOU ESCAPED OLIN! ====================");
+    println("Your routes through the two larger mazes are shown below. * marks visited floor cells.");
+    for (part, expected_moves) in ((1, 84), (2, 178))
+        try
+            sandbox = tested_modules["testme_part_$part.jl"];
+            assignment = getfield(sandbox, :OlinEscape);
+            checks = getfield(sandbox, :PS2Checks);
+            filename = "production_part_$part.txt";
+            maze = assignment.readmaze(joinpath(@__DIR__, "data", filename));
+            original = deepcopy(maze); # draw the original floor plan even if a solver changes its input
+            solver = part == 1 ? assignment.escape_part_1 : assignment.escape_part_2;
+            validator = part == 1 ? checks.valid_part_1 : checks.valid_part_2;
+            route = solver(maze);
+            validator(original, route) && length(route) - 1 == expected_moves ||
+                error("the solver did not return a shortest route on this call");
+
+            println("\nPart $part: data/$filename — $(length(route) - 1) moves");
+            println(assignment.rendermaze(original; route=route));
+            output = joinpath(@__DIR__, "outputs", "escape-part-$part.svg");
+            drawing = assignment.savemaze(original, output; route=route);
+            println("Open in a browser: ", drawing);
+        catch caught
+            println("Part $part route display could not be completed: ", sprint(showerror, caught));
+            println("The test results and MANIFEST.txt are still available.");
+        end
+    end
+    if !isempty(discussion_issues)
+        println("\nBefore submitting: finish the questions listed above in responses.md.");
+    end
 end
 
 # Repeat the manual Canvas boundary immediately before the upload instructions -

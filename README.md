@@ -1,18 +1,16 @@
-# Problem Set (PS2): Escape from Olin Hall with a missing CornellID
+# Problem Set 2 (PS2): Escape from Olin Hall with a missing CornellID
 
 It is late in Olin. You have finished working in the lab and are ready to go
 home, but you're tired and disoriented. The corridors and rooms seem like a
 maze. You have a floor plan showing your starting location, the walls, and the
-exit, but need help to find the shortest path out of the building.
-
-Write a program that uses the floor plan to find a route to the exit
+exit. Write a program that uses the floor plan to find a route to the exit
 with the fewest moves.
 
 This problem set combines queues from Week 3 with breadth-first search from
 Week 4. In Part 1, your program tracks your location. In Part 2, locked doors
-require your missing ID, so the program must also track whether you
-have collected your ID. The program must find a route with the fewest moves,
-even if it requires a detour to collect the ID and, then return through a corridor you have already visited.
+require your missing CornellID, so the program must also track whether you
+have collected it. Reaching the exit may require a detour to collect your ID
+and a return through a corridor you have already visited.
 
 ## Logistics
 
@@ -76,16 +74,15 @@ Do not edit [`testme_part_1.jl`](testme_part_1.jl),
 [`check_submission.jl`](check_submission.jl), or the map files to make an
 incomplete solution appear to pass.
 
-## The Problem
+## The problem
 
 You will develop your maze search program in two parts.
 
 * In **Part 1**, there are no locked doors, so the program only needs to track
-your location as it searches.
+  your location as it searches.
 * In **Part 2**, some routes pass through locked doors that require your CornellID
-for access. You start without your CornellID, but its location is marked on the
-floor plan. Reaching the exit may require a detour to collect your CornellID and
-then a return through a corridor you have already visited.
+  for access. You start without your CornellID, but its location is marked on the
+  floor plan.
 
 ## Reading the map
 
@@ -109,7 +106,8 @@ defined within the scripts.
 
 The [`check_submission.jl`](check_submission.jl) script runs both
 `testme_part_1.jl` and `testme_part_2.jl`, prints the test results, and writes
-the results to `MANIFEST.txt`. See
+the results to `MANIFEST.txt`. It also warns about unanswered questions in
+[`responses.md`](responses.md). See
 [Checking and submitting your work](#checking-and-submitting-your-work) for
 the submission instructions.
 
@@ -136,6 +134,7 @@ at 1. Rows increase downward; columns increase to the right. For example,
 `(2, 4)` means row 2, column 4. The symbol at that position is
 `maze.cells[2, 4]`.
 
+The four maps are fictional layouts created for this assignment.
 The ASCII examples label rows on the left and columns across the top.
 The labels and spaces between cells are added for readability; the map files
 contain only the maze characters.
@@ -144,7 +143,7 @@ Each move takes you one cell **up, down, left, or right**. You cannot move
 diagonally, through walls, or outside the map. Each move costs `1` unit of
 effort, so the route with the fewest moves takes the least effort.
 
-Every map has exactly one source `S` and one exit `E` location. Each maze may
+Every map has exactly one start `S` and one exit `E`. Each maze may
 contain at most one CornellID (`K`) and any number of locked doors (`D`),
 including none. The [`readmaze`](src/Files.jl) function checks the file format.
 A correctly formatted maze may still have no route to the exit. An edge cell
@@ -314,6 +313,13 @@ ends at `E`, follows the movement and CornellID rules, and uses the fewest moves
 
 ## Display your escape route
 
+When all 48 tests pass, [`check_submission.jl`](check_submission.jl) prints
+your routes through `production_part_1.txt` and `production_part_2.txt` as
+ASCII maps. The `*` symbols mark the floor cells your code visits. The script
+also saves `outputs/escape-part-1.svg` and `outputs/escape-part-2.svg`, which
+you can open in a browser. The routes are shown even if you still need to
+finish the discussion questions.
+
 The supplied [`runmaze.jl`](runmaze.jl) script prints an ASCII map and the route
 returned by your solver. It also saves a drawing as an SVG file. After
 implementing `escape_part_1`, run:
@@ -357,7 +363,9 @@ Complete the three prompts in [`responses.md`](responses.md). A short paragraph
 per question is enough. Explain why the state must record whether you have
 your CornellID, why a queue finds a route with the fewest moves, and how many
 states the search could visit. The instructor reads and grades your responses;
-[`check_submission.jl`](check_submission.jl) does not grade them.
+[`check_submission.jl`](check_submission.jl) only looks for missing questions,
+empty answers, and remaining TODO placeholders. Keep the three numbered
+questions and replace each `TODO: Write your response.` with your answer.
 
 ## Checking and submitting your work
 
@@ -372,6 +380,12 @@ The [`check_submission.jl`](check_submission.jl) script runs
 [`testme_part_1.jl`](testme_part_1.jl) and
 [`testme_part_2.jl`](testme_part_2.jl), with **24 tests per script and 48 tests
 total**. It prints the results and records them in `MANIFEST.txt`.
+The script also lists questions in [`responses.md`](responses.md) that appear
+unfinished. If your code passes but answers are missing, the status is
+`DISCUSSION QUESTIONS NEED ATTENTION`. After you fill in the answers, run
+`check_submission.jl` again. Finding text under each question does not mean
+the answers are correct; the instructor still grades the writing.
+
 **The `check_submission.jl` script does not connect to Canvas or upload your
 work.** After all 48 tests pass, your code, documentation, and written
 responses still require the instructor review described in [RUBRIC.md](RUBRIC.md).

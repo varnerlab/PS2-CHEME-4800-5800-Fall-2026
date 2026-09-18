@@ -5,7 +5,7 @@ Name:
 NetID:
 
 Write one short paragraph per question. Use examples from your code and the
-supplied maps.
+supplied maps. Keep the numbered questions and replace each TODO with your answer.
 
 1. **Why track your CornellID?** In the
    [small Part 2 map](data/test_part_2.txt), why must the search treat

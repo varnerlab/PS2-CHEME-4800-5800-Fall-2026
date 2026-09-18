@@ -1,12 +1,13 @@
-# Complete the four public functions below. You may add private helpers in
+# Complete the four functions below. You may add helper functions in
 # Compute.jl or separate files inside src/. Load helper files from Include.jl;
-# all library-file include calls belong in Include.jl. Document helper contracts.
+# all library-file include calls belong in Include.jl. Document each helper's
+# purpose, arguments, and return value.
 
 """
     neighbors(maze::MyMazeModel, position::Position) -> Vector{Position}
 
-Find the non-wall cells one orthogonal move from `position`. This function
-checks the map geometry; Part 2's `nextstates(...)` applies the door-access rule.
+Find the cells one step up, down, left, or right from `position`, excluding
+walls. Part 2's `nextstates(...)` checks whether you can enter a door.
 
 ### Arguments
 
@@ -16,9 +17,9 @@ checks the map geometry; Part 2's `nextstates(...)` applies the door-access rule
 
 ### Returns
 
-- `Vector{Position}`: Distinct in-bounds, non-wall cells one step up, down,
-  left, or right, in any order. Treat `S`, `E`, `K`, and `D` as non-wall cells.
-  Return an empty vector when there are no such neighbors.
+- `Vector{Position}`: Neighboring cells inside the map that are not walls.
+  Include each position once, in any order. Include neighboring `S`, `E`, `K`,
+  and `D` cells. Return an empty vector when there are no such neighbors.
 
 ### Errors
 
@@ -29,8 +30,8 @@ function neighbors(maze::MyMazeModel, position::Position)::Vector{Position}
     # TODO 1: Check that position is inside the map and is not a wall.
     # Throw an ArgumentError if either condition fails.
 
-    # TODO 2: Inspect the four orthogonal positions and collect the in-bounds,
-    # non-wall neighbors. Return each position once; door access is checked later.
+    # TODO 2: Inspect the cells one step up, down, left, and right. Leave out
+    # walls and cells outside the map. Return each remaining position once.
 
     throw(ErrorException("neighbors is not implemented yet"));
 end
@@ -39,7 +40,7 @@ end
     escape_part_1(maze::MyMazeModel) -> Union{Nothing, Vector{Position}}
 
 Find a route from the start to the exit with the fewest moves using breadth-first
-search and `MyQueue`. Every orthogonal move has unit cost.
+search and `MyQueue`. Each move goes one cell up, down, left, or right.
 
 ### Arguments
 
@@ -49,8 +50,8 @@ search and `MyQueue`. Every orthogonal move has unit cost.
 ### Returns
 
 - `Vector{Position}`: A shortest route in travel order, including the start
-  and exit. Consecutive positions must be legal neighbors. Any shortest route
-  is accepted, and its move count is `length(route) - 1`.
+  and exit. Each step moves to a neighboring cell without entering a wall.
+  Any shortest route is accepted. Its move count is `length(route) - 1`.
 - `nothing`: The exit is unreachable from the start.
 
 ### Errors
@@ -75,22 +76,23 @@ end
 """
     nextstates(maze::MyMazeModel, state::EscapeState) -> Vector{EscapeState}
 
-Find the states reachable in one legal move from `state`. Entering `K` collects
-the card automatically; entering `D` requires the card before the move. Card
-possession persists, and the same card works on every door.
+Find the states you can reach in one move from `state`. Entering `K` collects
+your CornellID automatically. You can enter `D` only if you already have your
+CornellID. You keep the ID for the rest of the route and can open every door.
 
 ### Arguments
 
 - `maze::MyMazeModel`: The maze to inspect. Its cell matrix is not modified.
 - `state::EscapeState`: The current `(row, column, has_cornell_id)`, recorded after
-  entering the cell. Validate its location and card flag locally; the function
-  need not establish whether the state is reachable from the start.
+  entering the cell. Check for the invalid inputs listed under Errors. The
+  state does not have to be reachable from the start.
 
 ### Returns
 
-- `Vector{EscapeState}`: Distinct legal states after one orthogonal move, in
-  any order. Each flag includes the effect of entering the destination cell.
-  Return an empty vector when no legal move is available.
+- `Vector{EscapeState}`: States you can reach by moving one cell up, down,
+  left, or right. Include each state once, in any order. Set `has_cornell_id`
+  to `true` when entering `K` and keep it `true` afterward. Return an empty
+  vector when you cannot move to any neighboring cell.
 
 ### Errors
 
@@ -99,8 +101,8 @@ possession persists, and the same card works on every door.
 """
 function nextstates(maze::MyMazeModel, state::EscapeState)::Vector{EscapeState}
 
-    # TODO 6: Validate the current state and use neighbors to find geometrically
-    # adjacent cells. A state on K or D must already have the card.
+    # TODO 6: Check the current state and use neighbors to find adjacent cells.
+    # A state on K or D must already have the CornellID.
 
     # TODO 7: Exclude doors when the card is absent. For each remaining neighbor,
     # retain the current flag or set it to true when entering K.
@@ -111,35 +113,36 @@ end
 """
     escape_part_2(maze::MyMazeModel) -> Union{Nothing, Vector{EscapeState}}
 
-Find a route with the fewest moves using breadth-first search over full
-`(row, column, has_cornell_id)` states. Use `MyQueue` for the frontier and
-`nextstates(...)` for legal moves. Every move has unit cost.
+Find a route with the fewest moves using breadth-first search over
+`(row, column, has_cornell_id)` states. Use `MyQueue` to hold states waiting
+to be explored and `nextstates(...)` to find the states you can reach next.
 
 ### Arguments
 
 - `maze::MyMazeModel`: A maze with at most one CornellID and any number of doors.
-  Ordinary maps without either symbol are also accepted. The model and its
+  Maps without a CornellID or doors are also accepted. The model and its
   cell matrix are not modified.
 
 ### Returns
 
 - `Vector{EscapeState}`: A shortest route in travel order, starting at
-  `(maze.start[1], maze.start[2], false)` and ending at the exit with either
-  card flag. Include both endpoints; the move count is `length(route) - 1`.
-  Any shortest route is accepted. Collecting the card is optional when no door
-  is needed, and a physical position may recur with a different card flag.
-- `nothing`: No legal escape route exists. An unreachable exit is a search
-  result, not an input error.
+  `(maze.start[1], maze.start[2], false)` and ending at the exit, with or
+  without your CornellID. Include the start and exit; the move count is
+  `length(route) - 1`. Any shortest route is accepted. The route may skip the
+  CornellID if no door is needed, or revisit a cell after collecting the ID.
+- `nothing`: There is no route to the exit. Return `nothing` rather than
+  throwing an error when the exit is unreachable.
 """
 function escape_part_2(maze::MyMazeModel)::Union{Nothing, Vector{EscapeState}}
 
     # TODO 8: Initialize a MyQueue{EscapeState}, discovered set, and predecessor
-    # dictionary. Start at S without the card; all three collections use full states.
+    # dictionary. Start at S without the CornellID. Store (row, column,
+    # has_cornell_id) in all three collections.
 
     # TODO 9: Search in first-in, first-out order using nextstates. Mark each
-    # full state when enqueueing it and record the predecessor that discovered it.
+    # state when enqueueing it and record the predecessor that discovered it.
 
-    # TODO 10: Reconstruct a shortest route to the exit with either card flag.
+    # TODO 10: Reconstruct a shortest route to the exit, with or without the ID.
     # Return nothing if every reachable state is processed without reaching E.
 
     throw(ErrorException("escape_part_2 is not implemented yet"));
